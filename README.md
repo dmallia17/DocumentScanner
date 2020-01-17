@@ -6,7 +6,7 @@
 
 
 ## To-Do List:
-- [ ] Complete transformForOCR function
+- [x] Complete transformForOCR function
 - [ ] Begin work on selecting individual characters
 - [ ] Begin work on organizing characters for recognition
 - [ ] Begin work on data preprocessing for network training
