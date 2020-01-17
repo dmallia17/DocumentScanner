@@ -8,6 +8,7 @@ import cv2 as cv
 import numpy as np
 import copy
 import math
+from keras.models import load_model
 
 # Helper function - facilitates sorting by contour area
 def sortByArea(contour):
@@ -80,12 +81,21 @@ def main():
         print('Usage: ./scan.py [IMAGE]')
         sys.exit()
 
+    # Load Model
+    
+
     # Read in image
     imageName = sys.argv[1]
     image = cv.imread(imageName, cv.IMREAD_COLOR)
 
     # Detect and transform document prior to OCR
     document, contoured, transformed = transformForOCR(image)
+
+    # Detect individual characters in document
+
+
+    # Collect outputs of the neural network
+
 
     # Display transform results
     cv.namedWindow('Transformed', cv.WINDOW_NORMAL)
@@ -99,8 +109,10 @@ def main():
     cv.waitKey(1)
 
     # Save the document image to a new file
+    cv.imwrite(imageName + 'Transformed', transformed)
 
     # Write text to file 
+
 
 if __name__ == "__main__":
     main()
