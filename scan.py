@@ -45,10 +45,10 @@ def transformForOCR(image):
     cv.drawContours(contoured, contours, 0, (0, 0, 255), thickness=100)
 
     # Approximate contour with rectangle and draw box points on contoured
-    epsilon = 0.1*cv.arcLength(documentContour,True)
-    approx = cv.approxPolyDP(documentContour,epsilon,True)
+    tolerance = 0.1*cv.arcLength(documentContour,True)
+    approximateRectangle = cv.approxPolyDP(documentContour,tolerance,True)
     approxList = []
-    for point in approx: # Convert to normal list
+    for point in approximateRectangle: # Convert to normal list
         approxList.append(tuple(point[0]))
     for point in approxList:
         cv.circle(contoured, point, radius=5, color=(0,255,0), thickness=100)
@@ -78,11 +78,11 @@ def transformForOCR(image):
 def main():
     # Usage Handling:
     if(len(sys.argv) != 2):
-        print('Usage: ./scan.py [IMAGE]')
+        print('Usage: ./scan.py [IMAGE.jpg]')
         sys.exit()
 
     # Load Model
-    
+
 
     # Read in image
     imageName = sys.argv[1]
@@ -109,7 +109,8 @@ def main():
     cv.waitKey(1)
 
     # Save the document image to a new file
-    cv.imwrite(imageName + 'Transformed', transformed)
+    imageName = imageName.rstrip(".jpg")
+    cv.imwrite(imageName + 'Transformed.jpg', transformed)
 
     # Write text to file 
 
