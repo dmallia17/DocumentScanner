@@ -12,4 +12,5 @@
 - [ ] Begin work on organizing characters for recognition
 - [x] Begin work on data preprocessing for network training
 - [ ] Refine network accuracy: most likely via data augmentation.
-- [] Pip freeze for requirements.txt - update to include Pillow
+- [ ] Pip freeze for requirements.txt - update to include Pillow
+- [ ] Update notice regarding code used from article in char.py
