@@ -1,3 +1,8 @@
+# Authors: Sajarin Dider and Daniel Mallia
+
+# Use of EAST detector inspired by: 
+# https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
+
 import cv2
 import numpy as np 
 
@@ -8,18 +13,20 @@ def findCorners(bound):
     c4 = [bound[3][0],bound[2][1]]
     return [c1,c2,c3,c4]
 
+def returnWordBBoxes(image):
+
+
 if __name__ == "__main__":
 
     bndingBx = []#holds bounding box of each countour
     corners = []
     image = cv2.imread('e.png',0)
     blur = cv2.GaussianBlur(image,(5,5),0)
-    copy = image.copy()
-    #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    #th3 = cv2.adaptiveThreshold(image,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,2)
-    ret3, th3 = cv2.threshold(blur,0,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
+    threshold, threshImage = cv2.threshold(blur,0,255,
+        cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
      
-    contours, heirar = cv2.findContours(th3, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contours, heirar = cv2.findContours(threshImage, cv2.RETR_CCOMP, 
+        cv2.CHAIN_APPROX_SIMPLE)
     for num in range(0,len(contours)):
         #make sure contour is for letter and not cavity
         if(heirar[0][num][3] == -1):
@@ -32,10 +39,10 @@ if __name__ == "__main__":
         for bx in bndingBx:
             corners.append(findCorners(bx))
     
-        #draw the countours on thresholded image
-        x,y,w,h = cv2.boundingRect(th3)
+        #draw the countours on threshImage image
+        x,y,w,h = cv2.boundingRect(threshImage)
 
-    cv2.imshow('thresh', th3)
+    cv2.imshow('thresh', threshImage)
     cv2.waitKey()
 
 

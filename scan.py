@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# Author: Daniel Mallia
+# Authors: Daniel Mallia and Sajarin Dider
 # Date Begun: 1/17/2020
 
 import sys

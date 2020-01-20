@@ -1,13 +1,15 @@
 # DocumentScanner
 ## TTP Capstone Project
 
-### Author: Daniel Mallia
+### Author: Daniel Mallia and Sajarin Dider
 ### Date Begun: 1/17/2020
 
 
 ## To-Do List:
 - [x] Complete transformForOCR function
-- [ ] Begin work on selecting individual characters
+- [x] Begin work on selecting individual characters
+- [ ] Incorporate EAST detector.
 - [ ] Begin work on organizing characters for recognition
-- [ ] Begin work on data preprocessing for network training
-- [ ] Pip freeze for requirements.txt - include file in repository
+- [x] Begin work on data preprocessing for network training
+- [ ] Refine network accuracy: most likely via data augmentation.
+- [] Pip freeze for requirements.txt - update to include Pillow
