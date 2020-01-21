@@ -60,17 +60,37 @@ def returnCharacterImageList(lines, image):
             for num in range(0, len(contours)):
                 #make sure contour is for letter and not cavity
                 #if(heirarchy[0][num][3] == -1):
-                xLetter, yLetter, wLetter, hLetter = cv.boundingRect(contours[num])
-                boxes.append((xLetter, yLetter, wLetter, hLetter))
+                xLetterStart, yLetterStart, wLetter, hLetter = cv.boundingRect(contours[num])
+                
+                xLetterEnd = xLetterStart + wLetter
+                yLetterEnd = yLetterStart + hLetter
+
+                if(xLetterStart - 5 < 0):
+                    xLetterStart = 0
+                else:
+                    xLetterStart -= 5
+
+                if(yLetterStart - 10 < 0):
+                    yLetterStart = 0
+                else:
+                    yLetterStart -= 10
+
+                if(xLetterEnd + 5 > w):
+                    xLetterEnd += w - xLetterEnd
+                else:
+                    xLetterEnd += 5
+
+                if(yLetterEnd + 10 > h):
+                    yLetterEnd += h - yLetterEnd
+                else:
+                    yLetterEnd += 10
+                
+                boxes.append((xLetterStart, yLetterStart, xLetterEnd, yLetterEnd))
             
             boxes.sort(key=sortByX)
 
             for box in boxes:
-                xBox = box[0]
-                yBox = box[1]
-                wBox = box[2]
-                hBox = box[3]
-                characterImages.append(regionCopy[yBox: yBox+hBox, xBox: xBox+wBox])
+                characterImages.append(regionCopy[box[1]:box[3], box[0]:box[2]])
     
     return characterImages
 
@@ -220,12 +240,16 @@ if __name__ == "__main__":
     # h = word[3]
     # region = copyImage[y:y+h,x:x+w]
     
-    cv.imshow('Test', characterList[0])
-    cv.imshow('Test1', characterList[1])
-    cv.imshow('Test2', characterList[2])
-    cv.imshow('Test3', characterList[3])
-    cv.waitKey(0)
+    # cv.imshow('Test', characterList[0])
+    # cv.imshow('Test1', characterList[1])
+    # cv.imshow('Test2', characterList[2])
+    # cv.imshow('Test3', characterList[3])
+    # cv.waitKey(0)
 
+    cv.imwrite('1.jpg', characterList[4])
+    cv.imwrite('2.jpg', characterList[5])
+    cv.imwrite('3.jpg', characterList[6])
+    cv.imwrite('4.jpg', characterList[7])
     
 
 
