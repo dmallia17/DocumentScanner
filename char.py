@@ -28,7 +28,13 @@ def findCorners(bound):
     c4 = [bound[3][0],bound[2][1]]
     return [c1,c2,c3,c4]
 
-def returnWordBBoxes(image):
+def sortByX(box):
+    return box[0]
+
+def sortByBottomLeft(line):
+    return line[0]
+
+def returnLines(image):
 
     # Need to scale image to a multiple of 32 - just steps down to next multiple of 32 
     newRows, newCols = image.shape[:2]
@@ -134,26 +140,37 @@ def returnWordBBoxes(image):
             #     0.5, (255, 0, 0), 2)
 
     
+    # for line in lines:
+    #     color = (int(random() * 255), int(random() * 255), int(random() * 255))
+    #     for box in line[1:]:
+    #         x = box[0]
+    #         y = box[1]
+    #         w = box[2]
+    #         h = box[3]
+    #         cv.rectangle(output, (x, y), (x + w, y + h), color, 2)
+
+    lines.sort(key=sortByBottomLeft)    
     for line in lines:
-        color = (int(random() * 255), int(random() * 255), int(random() * 255))
-        for box in line[1:]:
-            x = box[0]
-            y = box[1]
-            w = box[2]
-            h = box[3]
-            cv.rectangle(output, (x, y), (x + w, y + h), color, 2)
+        line.pop(0)
+        line.sort(key=sortByX)
 
     #show the output image
-    cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
-    cv.resizeWindow('Text Detection', 800, 600)
-    cv.imshow('Text Detection', output)
-    cv.waitKey(0)
+    # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
+    # cv.resizeWindow('Text Detection', 800, 600)
+    # cv.imshow('Text Detection', output)
+    # cv.waitKey(0)
     #cv.imwrite('text.jpg', output)
+
+    return lines
 
 if __name__ == "__main__":
 
     image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
-    returnWordBBoxes(image)
+    lines = returnLines(image)
+    for line in lines:
+        print(line)
+
+
     # bndingBx = []#holds bounding box of each countour
     # corners = []
     # image = cv.imread('e.png',0)
