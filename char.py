@@ -34,6 +34,46 @@ def sortByX(box):
 def sortByBottomLeft(line):
     return line[0]
 
+def returnCharacterImageList(lines, image):
+    characterImages = []
+
+    newRows, newCols = image.shape[:2]
+    newRows -= newRows % 32
+    newCols -= newCols % 32
+    resizedImage = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    for line in lines:
+        for word in line:
+            boxes = []
+
+            x = word[0]
+            y = word[1]
+            w = word[2]
+            h = word[3]
+
+            region = copy.deepcopy(resizedImage[y:y+h,x:x+w])
+            regionCopy = copy.deepcopy(region)
+            region = cv.cvtColor(region, cv.COLOR_RGB2GRAY)
+            threshold, region = cv.threshold(region,0,255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
+
+            contours, heirarchy = cv.findContours(region, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+
+            for num in range(0, len(contours)):
+                #make sure contour is for letter and not cavity
+                #if(heirarchy[0][num][3] == -1):
+                xLetter, yLetter, wLetter, hLetter = cv.boundingRect(contours[num])
+                boxes.append((xLetter, yLetter, wLetter, hLetter))
+            
+            boxes.sort(key=sortByX)
+
+            for box in boxes:
+                xBox = box[0]
+                yBox = box[1]
+                wBox = box[2]
+                hBox = box[3]
+                characterImages.append(regionCopy[yBox: yBox+hBox, xBox: xBox+wBox])
+    
+    return characterImages
+
 def returnLines(image):
 
     # Need to scale image to a multiple of 32 - just steps down to next multiple of 32 
@@ -167,8 +207,27 @@ if __name__ == "__main__":
 
     image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
     lines = returnLines(image)
-    for line in lines:
-        print(line)
+    characterList = returnCharacterImageList(lines, image)
+
+    # newRows, newCols = image.shape[:2]
+    # newRows -= newRows % 32
+    # newCols -= newCols % 32
+    # copyImage = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    # word = lines[0][0]
+    # x = word[0]
+    # y = word[1]
+    # w = word[2]
+    # h = word[3]
+    # region = copyImage[y:y+h,x:x+w]
+    
+    cv.imshow('Test', characterList[0])
+    cv.imshow('Test1', characterList[1])
+    cv.imshow('Test2', characterList[2])
+    cv.imshow('Test3', characterList[3])
+    cv.waitKey(0)
+
+    
+
 
 
     # bndingBx = []#holds bounding box of each countour
