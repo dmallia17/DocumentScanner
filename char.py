@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # Authors: Sajarin Dider and Daniel Mallia
 
 # Use of EAST detector inspired by and some code used from: 
@@ -11,7 +13,7 @@
 # The download link for the .pb file (trained model) is here: 
 # https://www.dropbox.com/s/r2ingd0l3zt8hxs/frozen_east_text_detection.tar.gz?dl=1
 
-import cv as cv
+import cv2 as cv
 import numpy as np 
 import copy
 
@@ -23,13 +25,12 @@ def findCorners(bound):
     return [c1,c2,c3,c4]
 
 def returnWordBBoxes(image):
-    output = copy.deepcopy(image)
 
     # Need to scale image to a multiple of 32 - just steps down to next multiple of 32 
-    newRows, newCols = output.shape[:2]
+    newRows, newCols = image.shape[:2]
     newRows -= newRows % 32
     newCols -= newCols % 32
-    output = cv.resize(image, (newRows , newCols), interpolation = cv.INTER_LINEAR)
+    output = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
 
     # Import pretrained EAST detector
     east = cv.dnn.readNet('frozen_east_text_detection.pb')
@@ -39,8 +40,8 @@ def returnWordBBoxes(image):
 
     blob = cv.dnn.blobFromImage(output)
 
-    net.setInput(blob)
-    (scores, geometry) = net.forward(layerNames)
+    east.setInput(blob)
+    (scores, geometry) = east.forward(layerNames)
 
     # grab the number of rows and columns from the scores volume, then
     # initialize our set of bounding box rectangles and corresponding
@@ -91,58 +92,65 @@ def returnWordBBoxes(image):
 
             # add the bounding box coordinates and probability score to
             # our respective lists
-            rects.append((startX, startY, endX, endY))
-            confidences.append(scoresData[x])
+            rects.append([int(startX), int(startY), int(w), int(h)]) # MAY NEED TO SUBSTITUTE WIDTH AND HEIGHT
+            confidences.append(float(scoresData[x]))
 
     # apply non-maxima suppression to suppress weak, overlapping bounding
     # boxes
     
     #### USE OPENCV NMS
-    boxes = non_max_suppression(np.array(rects), probs=confidences)
+    indices = cv.dnn.NMSBoxes(rects, confidences, 0.5, 0.3)
 
-    # loop over the bounding boxes
-    for (startX, startY, endX, endY) in boxes:
-        # scale the bounding box coordinates based on the respective
-        # ratios
-        startX = int(startX * rW)
-        startY = int(startY * rH)
-        endX = int(endX * rW)
-        endY = int(endY * rH)
+    # ensure at least one detection exists
+    if len(indices) > 0:
+        # loop over the indexes we are keeping
+        for i in indices.flatten():
+            # extract the bounding box coordinates
+            (x, y) = (rects[i][0], rects[i][1])
+            (w, h) = (rects[i][2], rects[i][3])
 
-        # draw the bounding box on the image
-        cv2.rectangle(orig, (startX, startY), (endX, endY), (0, 255, 0), 2)
+            # draw a bounding box rectangle and label on the image
+            cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            text = str(confidences[i])
+            cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
+                0.5, (255, 0, 0), 2)
 
     # show the output image
-    cv2.imshow("Text Detection", orig)
-    cv2.waitKey(0)
+    # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
+    # cv.resizeWindow('Text Detection', 800, 600)
+    # cv.imshow('Text Detection', output)
+    # cv.waitKey(0)
+    cv.imwrite('text.jpg', output)
 
 if __name__ == "__main__":
 
-    bndingBx = []#holds bounding box of each countour
-    corners = []
-    image = cv.imread('e.png',0)
-    blur = cv.GaussianBlur(image,(5,5),0)
-    threshold, threshImage = cv.threshold(blur,0,255,
-        cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
+    image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
+    returnWordBBoxes(image)
+    # bndingBx = []#holds bounding box of each countour
+    # corners = []
+    # image = cv.imread('e.png',0)
+    # blur = cv.GaussianBlur(image,(5,5),0)
+    # threshold, threshImage = cv.threshold(blur,0,255,
+    #     cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
      
-    contours, heirar = cv.findContours(threshImage, cv.RETR_CCOMP, 
-        cv.CHAIN_APPROX_SIMPLE)
-    for num in range(0,len(contours)):
-        #make sure contour is for letter and not cavity
-        if(heirar[0][num][3] == -1):
-            left = tuple(contours[num][contours[num][:,:,0].argmin()][0])
-            right = tuple(contours[num][contours[num][:,:,0].argmax()][0])
-            top = tuple(contours[num][contours[num][:,:,1].argmin()][0])
-            bottom = tuple(contours[num][contours[num][:,:,1].argmax()][0])
-            bndingBx.append([top,right,bottom,left])
+    # contours, heirar = cv.findContours(threshImage, cv.RETR_CCOMP, 
+    #     cv.CHAIN_APPROX_SIMPLE)
+    # for num in range(0,len(contours)):
+    #     #make sure contour is for letter and not cavity
+    #     if(heirar[0][num][3] == -1):
+    #         left = tuple(contours[num][contours[num][:,:,0].argmin()][0])
+    #         right = tuple(contours[num][contours[num][:,:,0].argmax()][0])
+    #         top = tuple(contours[num][contours[num][:,:,1].argmin()][0])
+    #         bottom = tuple(contours[num][contours[num][:,:,1].argmax()][0])
+    #         bndingBx.append([top,right,bottom,left])
     
-        for bx in bndingBx:
-            corners.append(findCorners(bx))
+    #     for bx in bndingBx:
+    #         corners.append(findCorners(bx))
     
-        #draw the countours on threshImage image
-        x,y,w,h = cv.boundingRect(threshImage)
+    #     #draw the countours on threshImage image
+    #     x,y,w,h = cv.boundingRect(threshImage)
 
-    cv.imshow('thresh', threshImage)
-    cv.waitKey()
+    # cv.imshow('thresh', threshImage)
+    # cv.waitKey()
 
 
