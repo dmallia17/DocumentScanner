@@ -16,6 +16,10 @@
 import cv2 as cv
 import numpy as np 
 import copy
+from random import seed
+from random import random
+
+seed()
 
 def findCorners(bound):
     c1 = [bound[3][0],bound[0][1]]
@@ -101,6 +105,7 @@ def returnWordBBoxes(image):
     #### USE OPENCV NMS
     indices = cv.dnn.NMSBoxes(rects, confidences, 0.5, 0.3)
 
+    lines = []
     # ensure at least one detection exists
     if len(indices) > 0:
         # loop over the indexes we are keeping
@@ -109,18 +114,41 @@ def returnWordBBoxes(image):
             (x, y) = (rects[i][0], rects[i][1])
             (w, h) = (rects[i][2], rects[i][3])
 
-            # draw a bounding box rectangle and label on the image
-            cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            text = str(confidences[i])
-            cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
-                0.5, (255, 0, 0), 2)
+            bottomLeft = y + h
+            newLine = True
 
-    # show the output image
-    # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
-    # cv.resizeWindow('Text Detection', 800, 600)
-    # cv.imshow('Text Detection', output)
-    # cv.waitKey(0)
-    cv.imwrite('text.jpg', output)
+            for line in lines:
+                if(bottomLeft > .97 * line[0] and bottomLeft < 1.03 * line[0]):
+                    line.append((x, y, w, h))
+                    newLine = False
+                    break
+
+            if(newLine):
+                lines.append([bottomLeft, (x, y, w, h)])
+                    
+
+            # # draw a bounding box rectangle and label on the image
+            # cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # text = str(confidences[i])
+            # cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
+            #     0.5, (255, 0, 0), 2)
+
+    
+    for line in lines:
+        color = (int(random() * 255), int(random() * 255), int(random() * 255))
+        for box in line[1:]:
+            x = box[0]
+            y = box[1]
+            w = box[2]
+            h = box[3]
+            cv.rectangle(output, (x, y), (x + w, y + h), color, 2)
+
+    #show the output image
+    cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
+    cv.resizeWindow('Text Detection', 800, 600)
+    cv.imshow('Text Detection', output)
+    cv.waitKey(0)
+    #cv.imwrite('text.jpg', output)
 
 if __name__ == "__main__":
 
