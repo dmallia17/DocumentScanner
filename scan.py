@@ -8,7 +8,8 @@ import cv2 as cv
 import numpy as np
 import copy
 import math
-from keras.models import load_model
+#from keras.models import load_model
+import char 
 
 # Helper function - facilitates sorting by contour area
 def sortByArea(contour):
@@ -92,7 +93,8 @@ def main():
     document, contoured, transformed = transformForOCR(image)
 
     # Detect individual characters in document
-
+    lines = char.returnLines(transformed)
+    characterList = char.returnCharacterImageList(lines, transformed)
 
     # Collect outputs of the neural network
 
