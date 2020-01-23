@@ -21,13 +21,6 @@ from random import random
 
 seed()
 
-def findCorners(bound):
-    c1 = [bound[3][0],bound[0][1]]
-    c2 = [bound[1][0],bound[0][1]]
-    c3 = [bound[1][0],bound[2][1]]
-    c4 = [bound[3][0],bound[2][1]]
-    return [c1,c2,c3,c4]
-
 def sortByX(box):
     return box[0]
 
@@ -49,6 +42,23 @@ def returnCharacterImageList(lines, image):
             y = word[1]
             w = word[2]
             h = word[3]
+
+            if(x - 10 < 0): #if moving left by ten exceeds border, set x to 0
+                x = 0
+            else: 
+                x-= 10 #otherwise subtract x by 10
+            if(y - 10 < 0): #if moving up by 10 exceeds border, set y to 0
+                y = 0
+            else: 
+                y-= 10 #otherwise subtract y by 10 
+            if(x+w + 10 > numCols): #if moving right by 10 exceeds border set x to border - width of box 
+                x = numCols - w
+            else: 
+                x = w+10 #otherwise add 10 to x 
+            if(y+h + 10 > numRows): #if moving down by 10 exceeds border set y to border - height of box
+                y = numRows - h
+            else: 
+                y = h+10 #otherwise add 10 to y
 
             region = copy.deepcopy(resizedImage[y:y+h,x:x+w])
             regionCopy = copy.deepcopy(region)
@@ -102,9 +112,9 @@ def returnLines(image):
     newCols -= newCols % 32
     output = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
 
+####################################################################################################
     # Import pretrained EAST detector
     east = cv.dnn.readNet('frozen_east_text_detection.pb')
-
     # Required layer names
     layerNames = [ "feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3"]
 
@@ -167,7 +177,7 @@ def returnLines(image):
 
     # apply non-maxima suppression to suppress weak, overlapping bounding
     # boxes
-    
+######################################################################################################################    
     #### USE OPENCV NMS
     indices = cv.dnn.NMSBoxes(rects, confidences, 0.5, 0.3)
 
@@ -228,6 +238,10 @@ if __name__ == "__main__":
     image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
     lines = returnLines(image)
     characterList = returnCharacterImageList(lines, image)
+    
+    for line in lines:
+        for word in line: 
+
 
     # newRows, newCols = image.shape[:2]
     # newRows -= newRows % 32
@@ -251,8 +265,6 @@ if __name__ == "__main__":
     cv.imwrite('3.jpg', characterList[6])
     cv.imwrite('4.jpg', characterList[7])
     
-
-
 
     # bndingBx = []#holds bounding box of each countour
     # corners = []
