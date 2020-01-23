@@ -4,7 +4,7 @@
 
 # Use of EAST detector inspired by and some code used from: 
 # https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
-# WE TAKE NO CREDIT FOR THE CODE ON LINES 34 - 117
+# WE TAKE NO CREDIT FOR THE CODE ON LINES 122 - 187
 
 # NOTE: This script uses the TensorFlow Implementation of the EAST text 
 # detector, which is offered by OpenCV. 
