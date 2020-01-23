@@ -11,7 +11,8 @@
 - [x] Incorporate EAST detector.
 - [x] Begin work on organizing characters for recognition
 - [x] Begin work on data preprocessing for network training
-- [ ] Refine network accuracy: most likely via data augmentation.
-- [ ] Pip freeze for requirements.txt - update to include Pillow
-- [ ] Update notice regarding code used from article in char.py
-- [ ] Create loop for processing characters.
+- [] Refine network accuracy: most likely via data augmentation.
+- [x] Pip freeze for requirements.txt - update to include Pillow
+- [x] Update notice regarding code used from article in char.py
+- [x] Create loop for processing characters.
+- [ ] Add in checks to remove bad character localizations

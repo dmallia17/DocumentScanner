@@ -8,8 +8,23 @@ import cv2 as cv
 import numpy as np
 import copy
 import math
-#from keras.models import load_model
+from keras.models import load_model
 import char 
+
+classLabels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+ 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 
+ 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 
+ 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+ 'w', 'x', 'y', 'z']
+
+# Helper function - prepares image for input to network
+def processImage(image, dimension):
+    output = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    output = cv.resize(output, (dimension, dimension), interpolation = cv.INTER_LINEAR) # Resize - may want to try cv.INTER_AREA
+    output = output.astype('float32') / 255 # Scale (normalize) to match network training
+    output = np.expand_dims(output, axis=0) # Reshape as a 4D tensor for input to network
+    
+    return output 
 
 # Helper function - facilitates sorting by contour area
 def sortByArea(contour):
@@ -83,7 +98,7 @@ def main():
         sys.exit()
 
     # Load Model
-
+    network = load_model('OCRNetworkVersion2.h5')
 
     # Read in image
     imageName = sys.argv[1]
@@ -97,25 +112,47 @@ def main():
     characterList = char.returnCharacterImageList(lines, transformed)
 
     # Collect outputs of the neural network
+    text = ""
+    i = 0
+    for line in characterList: # For every line
+        for word in line: # For every word
+            for characterImage in word: # For every character in that word
+                inputImage = processImage(characterImage, 32) # Prepare as input
+                view = cv.cvtColor(characterImage, cv.COLOR_BGR2RGB)
+                view = cv.resize(view, (32, 32), interpolation = cv.INTER_LINEAR)
+                cv.imwrite('./Images/Char' + str(i) + '.png', view)
+                results = network.predict(inputImage) # Pass through network
+                result = classLabels[np.argmax(results)]
+                text += result # Append result
+                i+=1
+            text += " " # Add space after every word
+        text += "\n" # Add newline after every line
 
-
-    # Display transform results
-    cv.namedWindow('Transformed', cv.WINDOW_NORMAL)
-    cv.resizeWindow('Transformed', 800, 600)
-    cv.imshow('Transformed', transformed)
-    if(cv.waitKey(0) == ord('q')):
-        cv.destroyWindow('Transformed')
-        cv.waitKey(1)
-        sys.exit()
-    cv.destroyWindow('Transformed')
-    cv.waitKey(1)
+    # # Display transform results
+    # cv.namedWindow('Transformed', cv.WINDOW_NORMAL)
+    # cv.resizeWindow('Transformed', 800, 600)
+    # cv.imshow('Transformed', transformed)
+    # if(cv.waitKey(0) == ord('q')):
+    #     cv.destroyWindow('Transformed')
+    #     cv.waitKey(1)
+    #     sys.exit()
+    # cv.destroyWindow('Transformed')
+    # cv.waitKey(1)
 
     # Save the document image to a new file
-    imageName = imageName.rstrip(".jpg")
-    cv.imwrite(imageName + 'Transformed.jpg', transformed)
+    # imageName = imageName.rstrip(".jpg")
+    # cv.imwrite(imageName + 'Transformed.jpg', transformed)
 
     # Write text to file 
+    outputFileName = imageName.rstrip(".jpg") + "Text.txt"
+    try:
+        outputTextFile = open(outputFileName, 'x')
+    except:
+        print("Output text file already exists.")
+        sys.exit()
 
+    outputTextFile.write(text)
+    outputTextFile.close()
 
 if __name__ == "__main__":
     main()

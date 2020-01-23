@@ -4,7 +4,7 @@
 
 # Use of EAST detector inspired by and some code used from: 
 # https://www.pyimagesearch.com/2018/08/20/opencv-text-detection-east-text-detector/
-# WE TAKE NO CREDIT FOR THE CODE ON LINES 34 - 117
+# WE TAKE NO CREDIT FOR THE CODE ON LINES 122 - 187
 
 # NOTE: This script uses the TensorFlow Implementation of the EAST text 
 # detector, which is offered by OpenCV. 
@@ -33,9 +33,11 @@ def returnCharacterImageList(lines, image):
     newRows, newCols = image.shape[:2]
     newRows -= newRows % 32
     newCols -= newCols % 32
-    resizedImage = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    resizedImage = cv.resize(image, (newCols, newRows), interpolation = cv.INTER_LINEAR)
     for line in lines:
+        lineWordList = []
         for word in line:
+            wordCharacterList = []
             boxes = []
 
             x = word[0]
@@ -43,33 +45,34 @@ def returnCharacterImageList(lines, image):
             w = word[2]
             h = word[3]
 
-            if(x - 10 < 0): #if moving left by ten exceeds border, set x to 0
+            if(x - 5 < 0): #if moving left by 5 exceeds border, set x to 0
                 x = 0
             else: 
-                x-= 10 #otherwise subtract x by 10
+                x -= 5 #otherwise subtract x by 5
+
             if(y - 10 < 0): #if moving up by 10 exceeds border, set y to 0
                 y = 0
             else: 
-                y-= 10 #otherwise subtract y by 10 
-            if(x+w + 10 > numCols): #if moving right by 10 exceeds border set x to border - width of box 
-                x = numCols - w
+                y -= 10 #otherwise subtract y by 10 
+
+            if(x + w + 5 > newCols): #if moving right by 5 exceeds border increase width by difference
+                w += newCols - (x + w)
             else: 
-                x = w+10 #otherwise add 10 to x 
-            if(y+h + 10 > numRows): #if moving down by 10 exceeds border set y to border - height of box
-                y = numRows - h
+                w += 5 #otherwise add 5 to w
+
+            if(y + h + 10 > newRows): #if moving down by 10 exceeds border increase height by difference
+                h += newRows - (y + h)
             else: 
-                y = h+10 #otherwise add 10 to y
+                h += 10 #otherwise add 10 to h
 
             region = copy.deepcopy(resizedImage[y:y+h,x:x+w])
             regionCopy = copy.deepcopy(region)
             region = cv.cvtColor(region, cv.COLOR_RGB2GRAY)
             threshold, region = cv.threshold(region,0,255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
 
-            contours, heirarchy = cv.findContours(region, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+            contours, heirarchy = cv.findContours(region, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
             for num in range(0, len(contours)):
-                #make sure contour is for letter and not cavity
-                #if(heirarchy[0][num][3] == -1):
                 xLetterStart, yLetterStart, wLetter, hLetter = cv.boundingRect(contours[num])
                 
                 xLetterEnd = xLetterStart + wLetter
@@ -100,7 +103,11 @@ def returnCharacterImageList(lines, image):
             boxes.sort(key=sortByX)
 
             for box in boxes:
-                characterImages.append(regionCopy[box[1]:box[3], box[0]:box[2]])
+                wordCharacterList.append(regionCopy[box[1]:box[3], box[0]:box[2]])
+            
+            lineWordList.append(wordCharacterList)
+
+        characterImages.append(lineWordList)
     
     return characterImages
 
@@ -110,7 +117,7 @@ def returnLines(image):
     newRows, newCols = image.shape[:2]
     newRows -= newRows % 32
     newCols -= newCols % 32
-    output = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    output = cv.resize(image, (newCols, newRows), interpolation = cv.INTER_LINEAR)
 
 ####################################################################################################
     # Import pretrained EAST detector
@@ -224,12 +231,12 @@ def returnLines(image):
         line.pop(0)
         line.sort(key=sortByX)
 
-    #show the output image
+    # # show the output image
     # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
     # cv.resizeWindow('Text Detection', 800, 600)
     # cv.imshow('Text Detection', output)
     # cv.waitKey(0)
-    #cv.imwrite('text.jpg', output)
+    # cv.imwrite('text.jpg', output)
 
     return lines
 
@@ -238,10 +245,6 @@ if __name__ == "__main__":
     image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
     lines = returnLines(image)
     characterList = returnCharacterImageList(lines, image)
-    
-    for line in lines:
-        for word in line: 
-
 
     # newRows, newCols = image.shape[:2]
     # newRows -= newRows % 32
@@ -260,10 +263,10 @@ if __name__ == "__main__":
     # cv.imshow('Test3', characterList[3])
     # cv.waitKey(0)
 
-    cv.imwrite('1.jpg', characterList[4])
-    cv.imwrite('2.jpg', characterList[5])
-    cv.imwrite('3.jpg', characterList[6])
-    cv.imwrite('4.jpg', characterList[7])
+    # cv.imwrite('1.jpg', characterList[4])
+    # cv.imwrite('2.jpg', characterList[5])
+    # cv.imwrite('3.jpg', characterList[6])
+    # cv.imwrite('4.jpg', characterList[7])
     
 
     # bndingBx = []#holds bounding box of each countour
