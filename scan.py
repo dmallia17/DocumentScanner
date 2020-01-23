@@ -11,6 +11,12 @@ import math
 from keras.models import load_model
 import char 
 
+classLabels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C',
+ 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 
+ 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 
+ 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 
+ 'w', 'x', 'y', 'z']
+
 # Helper function - prepares image for input to network
 def processImage(image, dimension):
     output = cv.cvtColor(image, cv.COLOR_BGR2RGB)
@@ -112,7 +118,8 @@ def main():
         for word in line: # For every word
             for characterImage in word: # For every character in that word
                 inputImage = processImage(characterImage, 32) # Prepare as input
-                result = network.predict(inputImage) # Pass through network
+                results = network.predict(inputImage) # Pass through network
+                result = classLabels[np.argmax(results)]
                 text += result # Append result
             text += " " # Add space after every word
         text += "\n" # Add newline after every line

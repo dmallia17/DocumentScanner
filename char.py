@@ -33,7 +33,7 @@ def returnCharacterImageList(lines, image):
     newRows, newCols = image.shape[:2]
     newRows -= newRows % 32
     newCols -= newCols % 32
-    resizedImage = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    resizedImage = cv.resize(image, (newCols, newRows), interpolation = cv.INTER_LINEAR)
     for line in lines:
         lineWordList = []
         for word in line:
@@ -49,16 +49,19 @@ def returnCharacterImageList(lines, image):
                 x = 0
             else: 
                 x -= 5 #otherwise subtract x by 5
+
             if(y - 10 < 0): #if moving up by 10 exceeds border, set y to 0
                 y = 0
             else: 
                 y -= 10 #otherwise subtract y by 10 
-            if(x + w + 5 > numCols): #if moving right by 5 exceeds border increase width by difference
-                w += numCols - (x + w)
+
+            if(x + w + 5 > newCols): #if moving right by 5 exceeds border increase width by difference
+                w += newCols - (x + w)
             else: 
                 w += 5 #otherwise add 5 to w
-            if(y + h + 10 > numRows): #if moving down by 10 exceeds border increase height by difference
-                h += numRows - (y + h)
+
+            if(y + h + 10 > newRows): #if moving down by 10 exceeds border increase height by difference
+                h += newRows - (y + h)
             else: 
                 h += 10 #otherwise add 10 to h
 
@@ -119,7 +122,7 @@ def returnLines(image):
     newRows, newCols = image.shape[:2]
     newRows -= newRows % 32
     newCols -= newCols % 32
-    output = cv.resize(image, (newRows, newCols), interpolation = cv.INTER_LINEAR)
+    output = cv.resize(image, (newCols, newRows), interpolation = cv.INTER_LINEAR)
 
 ####################################################################################################
     # Import pretrained EAST detector
@@ -212,11 +215,11 @@ def returnLines(image):
                 lines.append([bottomLeft, (x, y, w, h)])
                     
 
-            # # draw a bounding box rectangle and label on the image
-            # cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            # text = str(confidences[i])
-            # cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
-            #     0.5, (255, 0, 0), 2)
+            # draw a bounding box rectangle and label on the image
+            cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            text = str(confidences[i])
+            cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
+                0.5, (255, 0, 0), 2)
 
     
     # for line in lines:
@@ -233,12 +236,12 @@ def returnLines(image):
         line.pop(0)
         line.sort(key=sortByX)
 
-    #show the output image
-    # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
-    # cv.resizeWindow('Text Detection', 800, 600)
-    # cv.imshow('Text Detection', output)
-    # cv.waitKey(0)
-    #cv.imwrite('text.jpg', output)
+    # show the output image
+    cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
+    cv.resizeWindow('Text Detection', 800, 600)
+    cv.imshow('Text Detection', output)
+    cv.waitKey(0)
+    cv.imwrite('text.jpg', output)
 
     return lines
 
@@ -247,10 +250,6 @@ if __name__ == "__main__":
     image = cv.imread('testTransformed.jpg', cv.IMREAD_COLOR)
     lines = returnLines(image)
     characterList = returnCharacterImageList(lines, image)
-    
-    for line in lines:
-        for word in line: 
-
 
     # newRows, newCols = image.shape[:2]
     # newRows -= newRows % 32
@@ -269,10 +268,10 @@ if __name__ == "__main__":
     # cv.imshow('Test3', characterList[3])
     # cv.waitKey(0)
 
-    cv.imwrite('1.jpg', characterList[4])
-    cv.imwrite('2.jpg', characterList[5])
-    cv.imwrite('3.jpg', characterList[6])
-    cv.imwrite('4.jpg', characterList[7])
+    # cv.imwrite('1.jpg', characterList[4])
+    # cv.imwrite('2.jpg', characterList[5])
+    # cv.imwrite('3.jpg', characterList[6])
+    # cv.imwrite('4.jpg', characterList[7])
     
 
     # bndingBx = []#holds bounding box of each countour
