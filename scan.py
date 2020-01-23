@@ -113,14 +113,18 @@ def main():
 
     # Collect outputs of the neural network
     text = ""
-
+    i = 0
     for line in characterList: # For every line
         for word in line: # For every word
             for characterImage in word: # For every character in that word
                 inputImage = processImage(characterImage, 32) # Prepare as input
+                view = cv.cvtColor(characterImage, cv.COLOR_BGR2RGB)
+                view = cv.resize(view, (32, 32), interpolation = cv.INTER_LINEAR)
+                cv.imwrite('./Images/Char' + str(i) + '.png', view)
                 results = network.predict(inputImage) # Pass through network
                 result = classLabels[np.argmax(results)]
                 text += result # Append result
+                i+=1
             text += " " # Add space after every word
         text += "\n" # Add newline after every line
 

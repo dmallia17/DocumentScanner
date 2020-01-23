@@ -70,14 +70,9 @@ def returnCharacterImageList(lines, image):
             region = cv.cvtColor(region, cv.COLOR_RGB2GRAY)
             threshold, region = cv.threshold(region,0,255, cv.THRESH_BINARY_INV+cv.THRESH_OTSU)
 
-            contours, heirarchy = cv.findContours(region, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE)
+            contours, heirarchy = cv.findContours(region, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
             for num in range(0, len(contours)):
-
-#######################WE DON'T NEED CAVITY CHECK? #############################
-
-                #make sure contour is for letter and not cavity
-                #if(heirarchy[0][num][3] == -1): 
                 xLetterStart, yLetterStart, wLetter, hLetter = cv.boundingRect(contours[num])
                 
                 xLetterEnd = xLetterStart + wLetter
@@ -215,11 +210,11 @@ def returnLines(image):
                 lines.append([bottomLeft, (x, y, w, h)])
                     
 
-            # draw a bounding box rectangle and label on the image
-            cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
-            text = str(confidences[i])
-            cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
-                0.5, (255, 0, 0), 2)
+            # # draw a bounding box rectangle and label on the image
+            # cv.rectangle(output, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # text = str(confidences[i])
+            # cv.putText(output, text, (x, y - 5), cv.FONT_HERSHEY_SIMPLEX,
+            #     0.5, (255, 0, 0), 2)
 
     
     # for line in lines:
@@ -236,12 +231,12 @@ def returnLines(image):
         line.pop(0)
         line.sort(key=sortByX)
 
-    # show the output image
-    cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
-    cv.resizeWindow('Text Detection', 800, 600)
-    cv.imshow('Text Detection', output)
-    cv.waitKey(0)
-    cv.imwrite('text.jpg', output)
+    # # show the output image
+    # cv.namedWindow('Text Detection', cv.WINDOW_NORMAL)
+    # cv.resizeWindow('Text Detection', 800, 600)
+    # cv.imshow('Text Detection', output)
+    # cv.waitKey(0)
+    # cv.imwrite('text.jpg', output)
 
     return lines
 
