@@ -4,6 +4,9 @@
 ### Author: Daniel Mallia and Sajarin Dider
 ### Date Begun: 1/17/2020
 
+## Run Instructions:
+- Set up environment using pip/conda with requirements.txt
+- Run with "python3 scan.py [IMAGENAME.jpg]" or, given permission, "./scan.py [IMAGENAME.jpg]"
 
 ## To-Do List:
 - [x] Complete transformForOCR function
